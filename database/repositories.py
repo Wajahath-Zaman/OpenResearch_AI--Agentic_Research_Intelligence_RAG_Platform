@@ -18,7 +18,7 @@ class DocumentRepository:
         document = Document(**document_data)
 
         self.db.add(document)
-        self.db.commit()
+        self._commit()
         self.db.refresh(document)
 
         return document
@@ -89,7 +89,7 @@ class DocumentRepository:
 
         document.status = status
 
-        self.db.commit()
+        self._commit()
         self.db.refresh(document)
 
         return document
@@ -107,7 +107,15 @@ class DocumentRepository:
             return False
 
         self.db.delete(document)
-        self.db.commit()
+        self._commit()
 
         return True
 
+
+    def _commit(self):
+        try:
+            self.db.commit()
+
+        except Exception:
+            self.db.rollback()
+            raise

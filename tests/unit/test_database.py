@@ -275,3 +275,31 @@ def test_delete_nonexistent_document(db_session):
     result = repository.delete_document(uuid.uuid4())
 
     assert result is False
+
+
+def test_transaction_rollback(db_session):
+
+    repository = DocumentRepository(db_session)
+
+    # Insert a document with a DOI
+    repository.create_document(
+        title="Original Research Paper",
+        doi="10.1234/duplicate"
+    )
+
+    # Attempt To insert another document with the same DOI
+
+    with pytest.raises(Exception):
+        repository.create_document(
+            title="Duplicate Research paper",
+            doi="10.1234/duplicate"
+        )
+
+        # Verify that the session is usable after rollback
+        document = repository.create_document(
+            title="Another Research Paper",
+            doi="10.1234/unique"
+        )
+
+        assert document.id is not None
+        assert document.title == "Another Research Paper"
