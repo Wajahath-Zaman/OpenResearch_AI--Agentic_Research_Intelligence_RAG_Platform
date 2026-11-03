@@ -1,0 +1,32 @@
+# Environment
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+.open-research-intelligence-agent/
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data
+data/raw/*
+data/processed/*
+
+# Vector Database
+chroma_db/
+
+# MLflow
+mlruns/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
