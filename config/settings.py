@@ -57,6 +57,11 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
+    # Open Alex Configuration
+    openalex_api_key: str | None = None
+
+    openalex_base_url: str = "https://api.openalex.org"
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
