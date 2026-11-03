@@ -46,6 +46,13 @@ class DocumentRepository:
         return self.db.scalar(statement)
 
 
+    def get_document_by_openalex_id(self, openalex_id: str):
+        return (
+            self.db.query(Document)
+            .filter(Document.openalex_id == openalex_id)
+            .first()
+        )
+
 
     # Retrieve all documents
     def get_all_documents(

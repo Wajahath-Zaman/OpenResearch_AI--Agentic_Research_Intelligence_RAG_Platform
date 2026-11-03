@@ -303,3 +303,19 @@ def test_transaction_rollback(db_session):
 
         assert document.id is not None
         assert document.title == "Another Research Paper"
+
+
+def test_get_document_by_openalex_id(db_session):
+    repository = DocumentRepository(db_session)
+
+    document = repository.create_document(
+        title="Attention Is All You Need",
+        authors=["Ashish Vaswani"],
+        openalex_id="W123"
+    )
+
+    result = repository.get_document_by_openalex_id("W123")
+
+    assert result is not None
+    assert result.id == document.id
+    assert result.title == "Attention Is All You Need"
