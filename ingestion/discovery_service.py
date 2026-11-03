@@ -78,20 +78,18 @@ class ResearchDiscoveryService:
 
 
     def discover_and_store(
-            self,
-            query: str,
-            per_page: int = 10,
-            page: int = 1
+        self,
+        query: str,
+        per_page: int = 10,
+        page: int = 1
     ) -> dict:
 
         if self.repository is None:
-
             raise RuntimeError(
-
-                "DocumentRepository must be provided to store researc Papers."
+                "DocumentRepository must be provided to store research papers."
             )
 
-        # Discover and Normalize Papers
+        # Step 1: Discover and normalize papers
         discovery_result = self.discover(
             query=query,
             per_page=per_page,
@@ -100,23 +98,68 @@ class ResearchDiscoveryService:
 
         saved_documents = []
         duplicate_documents = []
+        unidentifiable_documents = []
 
-        for paper in discovery_result['results']:
+        seen_dois = set()
+        seen_openalex_ids = set()
 
+        # Step 2: Process each paper exactly once
+        for paper in discovery_result["results"]:
+
+            doi = paper.get("doi")
+            openalex_id = paper.get("openalex_id")
+
+            has_identifier = bool(doi or openalex_id)
+
+            # Check duplicates within the incoming batch
+            duplicate_in_batch = (
+                (doi and doi in seen_dois)
+                or
+                (openalex_id and openalex_id in seen_openalex_ids)
+            )
+
+            if duplicate_in_batch:
+                duplicate_documents.append(paper)
+                continue
+
+            # Check existing database records
             existing_document = self._find_existing_document(paper)
 
             if existing_document:
                 duplicate_documents.append(existing_document)
-                continue
 
-            new_document = self.repository.create_document(**paper)
+            else:
+                new_document = self.repository.create_document(**paper)
 
-            saved_documents.append(new_document)
+                saved_documents.append(new_document)
+
+                if not has_identifier:
+                    unidentifiable_documents.append(new_document)
+
+            # Track identifiers
+            if doi:
+                seen_dois.add(doi)
+
+            if openalex_id:
+                seen_openalex_ids.add(openalex_id)
+
+        # Step 3: Return processing statistics
+        return {
+            **discovery_result,
+            "saved_count": len(saved_documents),
+            "duplicate_count": len(duplicate_documents),
+            "unidentifiable_count": len(unidentifiable_documents),
+            "saved_documents": saved_documents,
+            "duplicate_documents": duplicate_documents,
+            "unidentifiable_documents": unidentifiable_documents
+        }
 
         return {
             **discovery_result,
             "saved_count": len(saved_documents),
             "duplicate_count": len(duplicate_documents),
+            "unidentifiable_count": len(unidentifiable_documents),
             "saved_documents": saved_documents,
-            "duplicate_documents": duplicate_documents
+            "duplicate_documents": duplicate_documents,
+            "unidentifiable_documents": unidentifiable_documents
         }

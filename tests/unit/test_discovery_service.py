@@ -139,7 +139,7 @@ class MockDocumentRepository:
 
     def __init__(self):
         self.documents = []
-        self.create_documents = []
+        self.created_documents = []
 
     def get_document_by_doi(self, doi):
 
@@ -163,7 +163,7 @@ class MockDocumentRepository:
         document = data.copy()
 
         self.documents.append(document)
-        self.create_documents.append(document)
+        self.created_documents.append(document)
 
         return document
 
@@ -188,7 +188,7 @@ def test_discover_and_store_success(sample_work):
 
     assert result["saved_count"] == 1
     assert result["duplicate_count"] == 0
-    assert len(repository.create_documents) == 1
+    assert len(repository.created_documents) == 1
 
 
 
@@ -246,34 +246,6 @@ def test_duplicate_openalex_id_is_not_inserted(sample_work):
     assert result["saved_count"] == 0
     assert result["duplicate_count"] == 1
 
-def test_duplicate_openalex_id_is_not_inserted(sample_work):
-
-    sample_work["doi"] = None
-
-    client = MockOpenAlexClient(
-        response={
-            "meta": {"count": 1},
-            "results": [sample_work]
-        }
-    )
-
-    repository = MockDocumentRepository()
-
-    repository.documents.append({
-        "doi": None,
-        "openalex_id": "W123"
-    })
-
-    service = ResearchDiscoveryService(
-        client=client,
-        repository=repository
-    )
-
-    result = service.discover_and_store("transformers")
-
-    assert result["saved_count"] == 0
-    assert result["duplicate_count"] == 1
-
 def test_repository_required_for_persistence(sample_work):
 
     client = MockOpenAlexClient(
@@ -287,3 +259,134 @@ def test_repository_required_for_persistence(sample_work):
 
     with pytest.raises(RuntimeError):
         service.discover_and_store("transformers")
+
+
+def test_duplicates_within_same_batch_are_skipped(sample_work):
+
+    duplicate_work = sample_work.copy()
+
+    client = MockOpenAlexClient(
+        response={
+            "meta": {"count": 2},
+            "results": [
+                sample_work,
+                duplicate_work
+            ]
+        }
+    )
+
+    repository = MockDocumentRepository()
+
+    service = ResearchDiscoveryService(
+        client=client,
+        repository=repository
+    )
+
+    result = service.discover_and_store("transformers")
+
+    assert result["saved_count"] == 1
+    assert result["duplicate_count"] == 1
+    assert len(repository.created_documents) == 1
+
+
+
+def test_missing_openalex_id_uses_doi(sample_work):
+
+    sample_work["id"] = None
+
+    client = MockOpenAlexClient(
+        response={
+            "meta": {"count": 1},
+            "results": [sample_work]
+        }
+    )
+
+    repository = MockDocumentRepository()
+
+    service = ResearchDiscoveryService(
+        client=client,
+        repository=repository
+    )
+
+    result = service.discover_and_store("transformers")
+
+    assert result["saved_count"] == 1
+    assert result["duplicate_count"] == 0
+    assert result["unidentifiable_count"] == 0
+
+
+def test_missing_openalex_id_uses_doi(sample_work):
+
+    sample_work["id"] = None
+
+    client = MockOpenAlexClient(
+        response={
+            "meta": {"count": 1},
+            "results": [sample_work]
+        }
+    )
+
+    repository = MockDocumentRepository()
+
+    service = ResearchDiscoveryService(
+        client=client,
+        repository=repository
+    )
+
+    result = service.discover_and_store("transformers")
+
+    assert result["saved_count"] == 1
+    assert result["duplicate_count"] == 0
+    assert result["unidentifiable_count"] == 0
+
+
+def test_missing_doi_uses_openalex_id(sample_work):
+
+    sample_work["doi"] = None
+
+    client = MockOpenAlexClient(
+        response={
+            "meta": {"count": 1},
+            "results": [sample_work]
+        }
+    )
+
+    repository = MockDocumentRepository()
+
+    service = ResearchDiscoveryService(
+        client=client,
+        repository=repository
+    )
+
+    result = service.discover_and_store("transformers")
+
+    assert result["saved_count"] == 1
+    assert result["duplicate_count"] == 0
+    assert result["unidentifiable_count"] == 0
+
+def test_missing_both_identifiers_flags_document(sample_work):
+
+    sample_work["doi"] = None
+    sample_work["id"] = None
+
+    client = MockOpenAlexClient(
+        response={
+            "meta": {"count": 1},
+            "results": [sample_work]
+        }
+    )
+
+    repository = MockDocumentRepository()
+
+    service = ResearchDiscoveryService(
+        client=client,
+        repository=repository
+    )
+
+    result = service.discover_and_store("transformers")
+
+    assert result["saved_count"] == 1
+    assert result["duplicate_count"] == 0
+    assert result["unidentifiable_count"] == 1
+
+    assert len(result["unidentifiable_documents"]) == 1
