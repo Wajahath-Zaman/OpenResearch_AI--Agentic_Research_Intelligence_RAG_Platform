@@ -1,6 +1,12 @@
 from llm.client import LLMClient
 from llm.context_injector import RAGContextInjector
 from llm.citation_formatter import CitationFormatter
+from guardrails.output_guardrail import OutputGuardrail
+
+
+class InvalidLLMOutputError(Exception):
+    """Raised when an LLM response fails output validation."""
+
 
 class RAGAnswerGenerator:
 
@@ -8,11 +14,13 @@ class RAGAnswerGenerator:
         self,
         context_injector: RAGContextInjector,
         llm_client: LLMClient,
-        citation_formatter: CitationFormatter | None = None
+        citation_formatter: CitationFormatter | None = None,
+        output_guardrail: OutputGuardrail | None = None
     ):
         self.context_injector = context_injector
         self.llm_client = llm_client
         self.citation_formatter = citation_formatter or CitationFormatter()
+        self.output_guardrail = output_guardrail or OutputGuardrail()
 
     def generate_answer(
         self,
@@ -36,12 +44,18 @@ class RAGAnswerGenerator:
             messages=rag_data["messages"]
         )
 
-        # Step 3: Format source citations
+        # Step 3: Validate the generated answer
+        validation = self.output_guardrail.validate(answer)
+
+        if not validation["valid"]:
+            raise InvalidLLMOutputError(validation["reason"])
+
+        # Step 4: Format source citations
         citations = self.citation_formatter.format_sources(
             rag_data["retrieved_chunks"]
         )
 
-        # Step 4: Return the answer and supporting information
+        # Step 5: Return the answer and supporting information
         return {
             "question": question,
             "answer": answer,

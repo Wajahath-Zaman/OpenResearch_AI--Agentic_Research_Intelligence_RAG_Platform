@@ -1,8 +1,10 @@
 import pytest
 from unittest.mock import MagicMock
 
-from llm.answer_generator import RAGAnswerGenerator
-
+from llm.answer_generator import (
+    RAGAnswerGenerator,
+    InvalidLLMOutputError
+)
 
 @pytest.fixture
 def context_injector():
@@ -126,3 +128,46 @@ def test_empty_question_raises_error(answer_generator):
 def test_invalid_question_type_raises_error(answer_generator):
     with pytest.raises(ValueError):
         answer_generator.generate_answer(None)
+
+def test_rejects_empty_llm_response(answer_generator, llm_client):
+    llm_client.generate.return_value = ""
+
+    with pytest.raises(InvalidLLMOutputError):
+        answer_generator.generate_answer("How are CNNs used?")
+
+
+def test_rejects_credential_exposure(answer_generator, llm_client):
+    llm_client.generate.return_value = "api_key: abc123secret"
+
+    with pytest.raises(InvalidLLMOutputError):
+        answer_generator.generate_answer("How are CNNs used?")
+
+
+def test_rejects_overlength_response(answer_generator, llm_client):
+    answer_generator.output_guardrail.max_length = 100
+    llm_client.generate.return_value = "A" * 101
+
+    with pytest.raises(InvalidLLMOutputError):
+        answer_generator.generate_answer("How are CNNs used?")
+
+
+def test_citations_not_generated_for_invalid_response(
+    answer_generator,
+    llm_client
+):
+    citation_formatter = MagicMock()
+    answer_generator.citation_formatter = citation_formatter
+
+    llm_client.generate.return_value = ""
+
+    with pytest.raises(InvalidLLMOutputError):
+        answer_generator.generate_answer("How are CNNs used?")
+
+    citation_formatter.format_sources.assert_not_called()
+
+
+def test_valid_response_passes_output_validation(answer_generator):
+    result = answer_generator.generate_answer("How are CNNs used?")
+
+    assert result["answer"]
+    assert "citations" in result

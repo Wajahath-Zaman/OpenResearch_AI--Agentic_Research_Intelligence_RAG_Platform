@@ -8,11 +8,15 @@ from agent.nodes.workflows import (
     comparison_workflow
 )
 
+from agent.nodes.validation import validate_input
+from guardrails.input_guardrail import InputGuardrail
+
 def build_agent_graph(
         answer_generator=None, 
         discovery_service=None,
         intent_classifier=None,
-        comparison_handler=None
+        comparison_handler=None,
+        input_guardrail=None
     ):
 
     graph = StateGraph(AgentState)
@@ -50,7 +54,16 @@ def build_agent_graph(
     else:
         graph.add_node("research", research_workflow)
 
-    graph.add_edge(START, "router")
+    graph.add_edge(START, "validation")
+
+    graph.add_conditional_edges(
+        "validation",
+        lambda state: "router" if state["error"] is None else "end",
+        {
+            "router": "router",
+            "end": END
+        }
+    )
 
     graph.add_conditional_edges(
         "router",
@@ -72,6 +85,19 @@ def build_agent_graph(
         )
     else:
         graph.add_node("comparison", comparison_workflow)
+
+
+    if input_guardrail is not None:
+        graph.add_node(
+            "validation",
+            lambda state: validate_input(
+                state,
+                guardrail=input_guardrail
+            )
+        )
+    else:
+        graph.add_node("validation", validate_input)
+        
 
     graph.add_edge("rag", END)
     graph.add_edge("research", END)
