@@ -1,0 +1,15 @@
+fastapi==0.162.0
+uvicorn==0.54.0
+sqlalchemy==2.1.6
+pydantic==2.14.2
+pydantic-settings==2.16.2
+python-dotenv==1.2.4
+python-multipart==0.0.33
+sentence-transformers==6.2.0
+chromadb==1.5.9
+pymupdf==2.1
+requests==2.34.2
+langgraph==1.2.19
+groq==0.37.1
+google-genai==2.34.0
+httpx==0.28.1

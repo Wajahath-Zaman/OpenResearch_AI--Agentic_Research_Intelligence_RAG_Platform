@@ -1,0 +1,17 @@
+.git
+.gitignore
+.env
+.venv
+venv
+.open-research-intelligence-agent
+__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.ipynb_checkpoints
+notebooks
+tests
+mlruns
+data/
+*.log

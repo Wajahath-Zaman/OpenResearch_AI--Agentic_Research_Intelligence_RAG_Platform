@@ -13,15 +13,14 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Data
-data/raw/*
-data/processed/*
-
-# Vector Database
+# Application Data
+data/
 chroma_db/
 
 # MLflow
 mlruns/
+
+
 
 # IDE
 .vscode/
