@@ -28,10 +28,14 @@ jobs:
         run: |
           pip install -r requirements-backend.txt
 
+      - name: Install evaluation dependencies
+        run: |
+          pip install -r requirements-evaluation.txt
+
       - name: Install testing dependencies
         run: |
           pip install pytest pytest-cov
-
+      
       - name: Run test suite
         run: |
           python -m pytest tests/ -v
