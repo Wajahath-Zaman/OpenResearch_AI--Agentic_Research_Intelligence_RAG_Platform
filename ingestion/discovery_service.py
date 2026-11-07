@@ -143,17 +143,9 @@ class ResearchDiscoveryService:
             if openalex_id:
                 seen_openalex_ids.add(openalex_id)
 
-        # Step 3: Return processing statistics
-        return {
-            **discovery_result,
-            "saved_count": len(saved_documents),
-            "duplicate_count": len(duplicate_documents),
-            "unidentifiable_count": len(unidentifiable_documents),
-            "saved_documents": saved_documents,
-            "duplicate_documents": duplicate_documents,
-            "unidentifiable_documents": unidentifiable_documents
-        }
+        
 
+        # Step 3: Return processing statistics
         return {
             **discovery_result,
             "saved_count": len(saved_documents),

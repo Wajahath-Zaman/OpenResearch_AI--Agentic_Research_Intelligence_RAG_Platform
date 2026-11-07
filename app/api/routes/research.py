@@ -10,6 +10,9 @@ from app.api.schemas.research import (
 from database.repositories import DocumentRepository
 from ingestion.discovery_service import ResearchDiscoveryService
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/research", tags=["Research"])
 
@@ -52,8 +55,10 @@ def discover_research(
 
         return result
 
-    except Exception:
+    except Exception as error:
+        logger.exception("Research discovery failed")
+
         raise HTTPException(
             status_code=502,
-            detail="Research discovery service failed."
+            detail=f"Research discovery failed: {str(error)}"
         )

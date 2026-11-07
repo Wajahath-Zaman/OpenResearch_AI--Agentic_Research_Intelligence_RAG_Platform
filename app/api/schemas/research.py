@@ -19,4 +19,7 @@ class ResearchDiscoveryResponse(BaseModel):
     saved_count: int
     duplicate_count: int
     unidentifiable_count: int
-    saved_documents: list[DocumentResponse]
+    results: list[dict] = Field(default_factory=list)
+    saved_documents: list[DocumentResponse] = Field(default_factory=list)
+    duplicate_documents: list[DocumentResponse] = Field(default_factory=list)
+    unidentifiable_documents: list[DocumentResponse] = Field(default_factory=list)

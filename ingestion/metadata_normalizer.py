@@ -112,17 +112,24 @@ def normalize_work(work: dict) -> dict:
         work.get("doi")
     )
 
-    # Extract source URL
+
+    # Extract source and PDF URLs
     best_location = work.get("best_oa_location") or {}
     primary_location = work.get("primary_location") or {}
 
     source_url = None
+    pdf_url = None
 
     if isinstance(best_location, dict):
         source_url = best_location.get("landing_page_url")
+        pdf_url = best_location.get("pdf_url")
 
-    if not source_url and isinstance(primary_location, dict):
-        source_url = primary_location.get("landing_page_url")
+    if isinstance(primary_location, dict):
+        if not source_url:
+            source_url = primary_location.get("landing_page_url")
+
+        if not pdf_url:
+            pdf_url = primary_location.get("pdf_url")
 
     # Extract Publication year
     publication_year = work.get("publication_year")
@@ -141,5 +148,6 @@ def normalize_work(work: dict) -> dict:
         "abstract": abstract,
         "publication_year": publication_year,
         "doi": doi,
-        "source_url": source_url
+        "source_url": source_url,
+        "pdf_url": pdf_url
     }

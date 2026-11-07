@@ -19,6 +19,10 @@ from database.models import DocumentStatus
 from ingestion.ingestion_service import DocumentIngestionService
 from app.api.schemas.document import DocumentIngestionResponse
 
+from ingestion.pdf_download_service import (
+    PDFDownloadService,
+    PDFDownloadError
+)
 
 router = APIRouter(prefix="/documents", tags=["Documents"])
 
@@ -117,6 +121,46 @@ def get_document(
         )
 
     return document
+
+
+@router.post(
+    "/{document_id}/download",
+    status_code=status.HTTP_200_OK
+)
+def download_document(
+    document_id: UUID,
+    db: Session = Depends(get_db)
+):
+    repository = DocumentRepository(db)
+
+    download_service = PDFDownloadService(
+        repository=repository
+    )
+
+    try:
+        result = download_service.download_pdf(document_id)
+        return result
+
+    except PDFDownloadError as error:
+
+        message = str(error)
+
+        if message == "Document not found.":
+            raise HTTPException(
+                status_code=404,
+                detail=message
+            )
+
+        if "No openly accessible PDF" in message:
+            raise HTTPException(
+                status_code=404,
+                detail=message
+            )
+
+        raise HTTPException(
+            status_code=502,
+            detail=message
+        )
 
 
 @router.delete("/{document_id}", status_code=status.HTTP_204_NO_CONTENT)

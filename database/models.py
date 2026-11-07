@@ -86,6 +86,11 @@ class Document(Base):
         nullable=True
     )
 
+    pdf_url: Mapped[str | None] = mapped_column(
+        String(1000),
+        nullable=True
+    )
+
     file_path: Mapped[str | None] = mapped_column(
         String(1000),
         nullable=True

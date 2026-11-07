@@ -101,6 +101,25 @@ class DocumentRepository:
 
         return document
 
+    def update_document_file_path(
+            self,
+            document_id: uuid.UUID,
+            file_path: str
+        ) -> Document | None:
+
+            document = self.get_document_by_id(document_id)
+
+            if document is None:
+                return None
+
+            document.file_path = file_path
+            document.status = DocumentStatus.DOWNLOADED
+
+            self._commit()
+            self.db.refresh(document)
+
+            return document
+
 
     # Delete document
     def delete_document(

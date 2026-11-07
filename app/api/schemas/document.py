@@ -18,6 +18,7 @@ class DocumentResponse(BaseModel):
     doi: str | None
     openalex_id: str | None
     source_url: str | None
+    pdf_url: str | None = None
     file_path: str | None
     status: DocumentStatus
     created_at: datetime
