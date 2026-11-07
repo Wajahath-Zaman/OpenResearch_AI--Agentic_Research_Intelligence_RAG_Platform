@@ -22,7 +22,7 @@ from database.base import Base
 
 
 class DocumentStatus(str, enum.Enum):
-    DISCOVERED = 'discoverd'
+    DISCOVERED = 'discovered'
     DOWNLOADED = 'downloaded'
     PROCESSED = 'processed'
     FAILED = 'failed'
@@ -108,6 +108,12 @@ class Document(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
+        nullable=False
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=func.now(),
         onupdate=func.now(),
         nullable=False
     )

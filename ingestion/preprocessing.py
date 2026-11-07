@@ -24,22 +24,25 @@ class TextPreprocessor:
         # Fix words split by line-break hyphenation
         text = re.sub(r"(?<=\w)-\n(?=\w)", "", text)
 
-        # Process individual lines
+        # Normalize individual lines
         lines = []
 
         for line in text.split("\n"):
-
-            # Remove leading and trailing whitespace
             line = line.strip()
-
-            # Normalize multiple spaces and tabs
             line = re.sub(r"[ \t]+", " ", line)
-
             lines.append(line)
 
-        # Preserve paragraph breaks but remove excessive blank lines
+        # Reconstruct text
         text = "\n".join(lines)
+
+        # Preserve paragraph boundaries
         text = re.sub(r"\n{3,}", "\n\n", text)
+
+        # Join single line breaks within paragraphs
+        text = re.sub(r"(?<!\n)\n(?!\n)", " ", text)
+
+        # Normalize excessive spaces
+        text = re.sub(r" {2,}", " ", text)
 
         return text.strip()
 
@@ -49,11 +52,9 @@ class TextPreprocessor:
         """
 
         processed_document = document.copy()
-
         processed_pages = []
 
         for page in document["pages"]:
-
             processed_page = page.copy()
 
             processed_page["text"] = self.preprocess_text(

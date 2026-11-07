@@ -19,6 +19,7 @@ class TextChunker:
     def chunk_text(self, text: str) -> list[str]:
         """
         Split text into overlapping word-based chunks.
+        Used for oversized paragraphs.
         """
 
         words = text.split()
@@ -34,7 +35,6 @@ class TextChunker:
             end = start + self.chunk_size
 
             chunk = " ".join(words[start:end])
-
             chunks.append(chunk)
 
             if end >= len(words):
@@ -44,9 +44,69 @@ class TextChunker:
 
         return chunks
 
+    def chunk_paragraphs(self, text: str) -> list[str]:
+        """
+        Combine paragraphs into chunks while preserving
+        paragraph boundaries wherever possible.
+        """
+
+        paragraphs = [
+            paragraph.strip()
+            for paragraph in text.split("\n\n")
+            if paragraph.strip()
+        ]
+
+        if not paragraphs:
+            return []
+
+        chunks = []
+        current_words = []
+
+        for paragraph in paragraphs:
+
+            paragraph_words = paragraph.split()
+
+            # Split oversized paragraphs separately
+            if len(paragraph_words) > self.chunk_size:
+
+                if current_words:
+                    chunks.append(" ".join(current_words))
+                    current_words = []
+
+                chunks.extend(self.chunk_text(paragraph))
+                continue
+
+            # Add paragraph if it fits
+            if len(current_words) + len(paragraph_words) <= self.chunk_size:
+
+                current_words.extend(paragraph_words)
+
+            else:
+                # Save current chunk
+                chunks.append(" ".join(current_words))
+
+                # Preserve overlap between chunks
+                overlap_words = (
+                    current_words[-self.chunk_overlap:]
+                    if self.chunk_overlap > 0
+                    else []
+                )
+
+                # Ensure the next chunk does not exceed chunk_size
+                if len(overlap_words) + len(paragraph_words) <= self.chunk_size:
+                    current_words = overlap_words + paragraph_words
+                else:
+                    current_words = paragraph_words
+
+        if current_words:
+            chunks.append(" ".join(current_words))
+
+        return chunks
+
     def chunk_document(self, document: dict) -> list[dict]:
         """
-        Generate chunks while preserving document and page metadata.
+        Generate paragraph-aware chunks while preserving
+        document and page metadata.
         """
 
         chunks = []
@@ -54,7 +114,7 @@ class TextChunker:
 
         for page in document["pages"]:
 
-            page_chunks = self.chunk_text(page["text"])
+            page_chunks = self.chunk_paragraphs(page["text"])
 
             for chunk_text in page_chunks:
 

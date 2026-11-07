@@ -1,0 +1,61 @@
+[
+    {
+        "question": "Which dataset was used in the study, and how many CT images did it contain?",
+        "reference": "The study used the IQ-OTH/NCCD lung cancer dataset, containing 1,097 CT images.",
+        "reference_contexts": [
+            "The research used the open and public Iraq-Oncology Teaching Hospital/National Center for Cancer Diseases (IQ-OTH/NCCD) dataset. The final curated dataset contained 1,097 total CT scans."
+        ]
+    },
+    {
+        "question": "What were the three diagnostic classes and their image counts?",
+        "reference": "The dataset contained three classes: benign with 120 images, malignant with 561 images, and normal with 416 images.",
+        "reference_contexts": [
+            "The final dataset was divided into three diagnostic categories: benign (n=120), malignant (n=561), and normal (n=416). The dataset was significantly imbalanced, with malignant cases being the largest class."
+        ]
+    },
+    {
+        "question": "How was the dataset divided into training, validation, and testing subsets?",
+        "reference": "The authors used stratified sampling to create training, validation, and testing subsets. Training contained 767 images (70%), validation contained 164 images (15%), and testing contained 166 images (15%).",
+        "reference_contexts": [
+            "Stratified sampling was used to partition the dataset into training (n=767, 70%), validation (n=164, 15%), and testing (n=166, 15%) subsets while maintaining the original class proportions."
+        ]
+    },
+    {
+        "question": "Which data augmentation techniques were applied during training?",
+        "reference": "The augmentation pipeline included RandomResizedCrop, random horizontal flipping with a 50% probability, and color jittering. Vertical flipping was deliberately omitted.",
+        "reference_contexts": [
+            "Each training image underwent RandomResizedCrop, with scaling between 8% and 100% of the original area and an aspect ratio between 0.75 and 1.33, followed by resizing to 224x224 pixels. Random horizontal flipping was applied with a 50% probability, along with color jittering of brightness, contrast, saturation, and hue by a factor of 0.4. Vertical flipping was deliberately omitted."
+        ]
+    },
+    {
+        "question": "What are the main architectural differences between ViT, DeiT, Swin Transformer, and BEiT?",
+        "reference": "ViT processes images as sequences of patches using self-attention. DeiT uses a teacher-student learning approach to improve data efficiency. Swin Transformer uses hierarchical representations and shifted local attention windows. BEiT uses self-supervised pretraining by predicting masked image patches.",
+        "reference_contexts": [
+            "ViT processes image data as a sequence of patches treated as tokens and applies self-attention across the image.",
+            "DeiT uses a teacher-student approach intended to improve data efficiency.",
+            "Swin Transformer divides images into smaller windows and applies local attention. Its shifted windows allow interaction between windows, while its hierarchical design captures broader context.",
+            "BEiT uses a self-supervised pretraining task in which the model predicts masked image patches to learn semantic knowledge and structural relationships."
+        ]
+    },
+    {
+        "question": "Which transformer architecture achieved the highest accuracy and F1-score?",
+        "reference": "Swin-Base achieved the highest accuracy of 98.80% and the highest F1-score of 97.52%.",
+        "reference_contexts": [
+            "The Swin-Base model achieved the highest performance with an accuracy of 98.80% and an F1-score of 97.52%, outperforming ViT-Base, DeiT-Base, and BEiT-Base."
+        ]
+    },
+    {
+        "question": "How did DeiT-Base and BEiT-Base perform compared with ViT-Base?",
+        "reference": "DeiT-Base achieved 96.39% accuracy and BEiT-Base achieved 95.78%, both outperforming ViT-Base, which achieved 95.18%. The authors associated DeiT's improvement with teacher-student learning and BEiT's improvement with masked image modelling.",
+        "reference_contexts": [
+            "DeiT-Base achieved 96.39% accuracy, BEiT-Base achieved 95.78%, and ViT-Base achieved 95.18%. The authors attributed DeiT's improvement to its data-efficient teacher-student learning mechanism and BEiT's improvement to its self-supervised masked image modelling task."
+        ]
+    },
+    {
+        "question": "What conclusions did the authors draw, and what future research directions did they suggest?",
+        "reference": "The authors concluded that Swin-Base provided the best classification performance and computational efficiency among the evaluated models. They suggested investigating data augmentation techniques and hybrid approaches to further improve performance.",
+        "reference_contexts": [
+            "The study concluded that Swin-Base achieved 98.80% accuracy and a 97.52% F1-score. Its hierarchical architecture and shifted-window mechanism helped capture local and long-range dependencies. The authors suggested that subsequent research could focus on enhancing performance through various data augmentation techniques and hybrid approaches."
+        ]
+    }
+]
