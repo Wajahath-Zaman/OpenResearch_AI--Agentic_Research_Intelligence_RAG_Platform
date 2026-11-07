@@ -1,0 +1,54 @@
+name: AI Agent CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CPU-only PyTorch
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+      - name: Install backend dependencies
+        run: |
+          pip install -r requirements-backend.txt
+
+      - name: Install testing dependencies
+        run: |
+          pip install pytest pytest-cov
+
+      - name: Run test suite
+        run: |
+          python -m pytest tests/ -v
+
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: |
+          docker build -f Dockerfile.backend -t ai-agent-backend:ci .
+
+      - name: Build frontend image
+        run: |
+          docker build -f Dockerfile.frontend -t ai-agent-frontend:ci .
