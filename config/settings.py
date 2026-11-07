@@ -31,10 +31,10 @@ class Settings(BaseSettings):
     )
 
     # LLM Providers
-    groq_api_key: str = os.getenv("GROQ_API_KEY")
+    groq_api_key: str | None = os.getenv("GROQ_API_KEY")
     groq_model: str = "openai/gpt-oss-20b"
 
-    gemini_api_key: str = os.getenv("GEMINI_API_KEY")
+    gemini_api_key: str | None = os.getenv("GEMINI_API_KEY")
     gemini_model: str = "gemini-3.1-flash-lite"
 
     # Embeddings
