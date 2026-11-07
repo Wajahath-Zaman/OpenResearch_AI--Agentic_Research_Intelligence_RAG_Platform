@@ -34,6 +34,13 @@ def compare_papers(request: PaperComparisonRequest):
             detail="One or more document IDs are invalid."
         )
 
+    # Reject duplicate document IDs before workflow initialization
+    if len(document_ids) != len(set(document_ids)):
+        raise HTTPException(
+            status_code=400,
+            detail="Duplicate document IDs are not allowed."
+        )
+
     try:
         workflow = PaperComparisonWorkflow()
 
